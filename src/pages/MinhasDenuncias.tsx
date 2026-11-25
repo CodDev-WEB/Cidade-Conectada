@@ -38,7 +38,7 @@ export function MinhasDenuncias() {
       <div className="lista-cartoes">
         {denuncias?.map((d) => (
           <Link key={d.id} to={`/denuncias/${d.id}`} className="cartao item-cartao">
-            <span className="item-icone" style={{ background: d.categoria_cor }}>{d.categoria_icone}</span>
+            <span className="item-icone" style={{ background: `${d.categoria_cor}26` }}>{d.categoria_icone}</span>
             <span className="item-texto">
               <strong>{d.titulo}</strong>
               <span className="sutil pequeno">{d.categoria_nome} · {formatarData(d.created_at)} · 👍 {d.apoios}</span>

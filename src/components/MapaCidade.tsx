@@ -9,8 +9,46 @@ import type { Denuncia, Estacao } from '../types/db'
 // Com bundler, o MapLibre precisa saber onde está o arquivo do worker.
 maplibregl.setWorkerUrl(workerUrl)
 
-// Mapa vetorial gratuito (OpenStreetMap via OpenFreeMap), com prédios em 3D.
-const ESTILO = 'https://tiles.openfreemap.org/styles/liberty'
+// Mapa vetorial gratuito (OpenStreetMap via OpenFreeMap), base clara e limpa.
+const ESTILO = 'https://tiles.openfreemap.org/styles/positron'
+
+// Paleta clara, estilo app de entrega: ruas brancas, rio azul-claro, verde suave.
+const CORES: Record<string, Record<string, string>> = {
+  background: { 'background-color': '#f3f4f6' },
+  landuse_residential: { 'fill-color': '#eef0f2' },
+  park: { 'fill-color': '#dcefd6' },
+  landcover_wood: { 'fill-color': '#e1efda' },
+  water: { 'fill-color': '#b9dcf2' },
+  waterway: { 'line-color': '#b9dcf2' },
+  building: { 'fill-color': '#e6e7eb', 'fill-outline-color': '#dcdde2' },
+  highway_path: { 'line-color': '#ffffff' },
+  highway_minor: { 'line-color': '#ffffff' },
+  highway_major_casing: { 'line-color': '#e1e3e8' },
+  highway_major_inner: { 'line-color': '#ffffff' },
+  highway_motorway_casing: { 'line-color': '#f5d77a' },
+  highway_motorway_inner: { 'line-color': '#fff3c4' },
+  'highway-name-minor': { 'text-color': '#8a8f98' },
+  'highway-name-major': { 'text-color': '#6b7079' },
+  water_name_point_label: { 'text-color': '#3b82b6' },
+  water_name_line_label: { 'text-color': '#3b82b6' },
+}
+
+function aplicarPaleta(m: MapaML) {
+  for (const [camada, props] of Object.entries(CORES)) {
+    if (!m.getLayer(camada)) continue
+    for (const [prop, valor] of Object.entries(props)) {
+      try {
+        m.setPaintProperty(camada, prop as never, valor as never)
+      } catch {
+        /* propriedade inexistente nesta versão do estilo */
+      }
+    }
+  }
+  // Ruas secundárias um pouco mais largas, para destacar sobre o fundo claro.
+  if (m.getLayer('highway_minor')) {
+    m.setPaintProperty('highway_minor', 'line-width', ['interpolate', ['exponential', 1.5], ['zoom'], 13, 1.5, 16, 6, 18, 16])
+  }
+}
 
 interface Props {
   denuncias?: Denuncia[]
@@ -43,8 +81,8 @@ export function MapaCidade({ denuncias = [], estacao, ponto, onClicarMapa, onSel
       container: container.current,
       style: ESTILO,
       center: centroInicial.current,
-      zoom: 15,
-      pitch: 55,
+      zoom: centro ? 16 : window.innerWidth < 800 ? 13.3 : 14.2,
+      pitch: 45,
       bearing: -20,
       maxPitch: 75,
       attributionControl: { compact: true },
@@ -56,6 +94,9 @@ export function MapaCidade({ denuncias = [], estacao, ponto, onClicarMapa, onSel
     )
 
     m.on('load', () => {
+      aplicarPaleta(m)
+      // Com os prédios em 3D, a versão plana só atrapalha.
+      if (m.getLayer('building')) m.setLayoutProperty('building', 'visibility', 'none')
       // Garante prédios em 3D mesmo que o estilo não traga a camada.
       if (!m.getLayer('building-3d') && m.getSource('openmaptiles')) {
         m.addLayer({
@@ -65,10 +106,10 @@ export function MapaCidade({ denuncias = [], estacao, ponto, onClicarMapa, onSel
           'source-layer': 'building',
           minzoom: 14,
           paint: {
-            'fill-extrusion-color': '#e7dfd3',
+            'fill-extrusion-color': '#e9eaee',
             'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 6],
             'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
-            'fill-extrusion-opacity': 0.85,
+            'fill-extrusion-opacity': 1,
           },
         })
       }

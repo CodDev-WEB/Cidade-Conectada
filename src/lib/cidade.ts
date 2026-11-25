@@ -1,7 +1,7 @@
 import type { Estacao, StatusDenuncia } from '../types/db'
 
-/** Centro urbano de Santarém-PA (orla, perto da Praça da Matriz). */
-export const CENTRO_SANTAREM: [number, number] = [-54.7083, -2.4430]
+/** Centro de visão inicial: da orla do Tapajós aos bairros ao sul. */
+export const CENTRO_SANTAREM: [number, number] = [-54.7130, -2.4480]
 
 /** Limites aceitos pelo banco (município com folga). */
 export const LIMITES = { latMin: -4.0, latMax: -1.7, lngMin: -55.6, lngMax: -53.9 }

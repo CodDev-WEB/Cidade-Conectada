@@ -42,8 +42,8 @@ export function Layout() {
       </header>
       {!supabaseConfigurado && (
         <div className="aviso">
-          Supabase não configurado: copie <code>.env.example</code> para <code>.env</code> e preencha
-          a URL e a chave do seu projeto. O mapa funciona, mas cadastro e denúncias ficam desativados.
+          Modo demonstração: as denúncias no mapa são exemplos. Para ativar cadastro e denúncias de verdade,
+          configure o Supabase (veja o README).
         </div>
       )}
       <main className="conteudo">
